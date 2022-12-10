@@ -135,9 +135,15 @@ class CoronaVirusSpider(object):
 
 
     def run(self):
+<<<<<<< HEAD
         # self.crawl_last_day_corona_virus()
         self.crawl_corona_virus()
         # self.crawl_last_day_cornoa_virus_of_china()
+=======
+        self.crawl_last_day_corona_virus()
+        self.crawl_corona_virus()
+        self.crawl_last_day_cornoa_virus_of_china()
+>>>>>>> 14b35f7 (获取1960年-2019年全球前10GDP数据)
         self.crawl_cornoa_virus_of_china()
 
 if __name__ == '__main__':
