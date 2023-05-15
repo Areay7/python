@@ -138,6 +138,9 @@ class CoronaVirusSpider(object):
         # self.crawl_last_day_corona_virus()
         self.crawl_corona_virus()
         # self.crawl_last_day_cornoa_virus_of_china()
+        self.crawl_last_day_corona_virus()
+        self.crawl_corona_virus()
+        self.crawl_last_day_cornoa_virus_of_china()
         self.crawl_cornoa_virus_of_china()
 
 if __name__ == '__main__':
