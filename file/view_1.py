@@ -1,14 +1,15 @@
 import sys
 import os
 from natsort import natsorted
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QFileDialog, QMessageBox
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QFileDialog, \
+    QTextEdit
+from PyQt5.QtCore import QTimer, Qt
 
 class MonitorApp(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('监控程序')
-        self.resize(500, 300)
+        self.resize(500, 400)  # Increased height for output text
 
         self.size_label = QLabel('产品尺码数量:')
         self.size_input = QLineEdit()
@@ -47,6 +48,11 @@ class MonitorApp(QWidget):
         main_layout.addLayout(self.size_layout)
         main_layout.addLayout(self.btn_layout)
 
+        # Output text area
+        self.output_text = QTextEdit()
+        self.output_text.setReadOnly(True)
+        main_layout.addWidget(self.output_text)
+
         self.setLayout(main_layout)
 
         self.prod_folder_path = ''
@@ -78,22 +84,24 @@ class MonitorApp(QWidget):
 
     def startMonitoring(self):
         if not self.prod_folder_path or not self.output_folder_path or not self.size_folder_path:
-            QMessageBox.warning(self, "警告", "请填写所有路径")
+            self.printError("请填写所有路径")
             return
 
         try:
             size_count = int(self.size_input.text())
         except ValueError:
-            QMessageBox.warning(self, "警告", "请输入有效的尺码数量")
+            self.printError("请输入有效的尺码数量")
             return
 
         self.monitoring = True
         self.createOutputFolders()
-        self.timer.start(1000) # Check every second
+        self.timer.start(1000)  # Check every second
+        self.printOutput("开始监控...")
 
     def stopMonitoring(self):
         self.monitoring = False
         self.timer.stop()
+        self.printOutput("监控已结束.")
 
     def createOutputFolders(self):
         try:
@@ -102,8 +110,9 @@ class MonitorApp(QWidget):
                 if os.path.isfile(file_path):
                     new_folder_path = os.path.join(self.output_folder_path, os.path.splitext(file_name)[0])
                     os.makedirs(new_folder_path, exist_ok=True)
+                    self.printOutput(f"已创建文件夹: {new_folder_path}")
         except Exception as e:
-            QMessageBox.warning(self, "警告", f"出现错误：{e}")
+            self.printError(f"出现错误：{e}")
 
     def checkFolder(self):
         if not self.monitoring:
@@ -124,11 +133,25 @@ class MonitorApp(QWidget):
                     new_file_name = os.path.basename(target_folder) + os.path.splitext(file_name)[0] + \
                                     os.path.splitext(file_name)[1]
                     os.rename(file_path, os.path.join(target_folder, new_file_name))
+                    self.printOutput(f"已移动文件: {file_name} 到文件夹: {target_folder}")
+
+            # 清空self.size_folder_path中的文件
+            for file_name in os.listdir(self.size_folder_path):
+                file_path = os.path.join(self.size_folder_path, file_name)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+
             self.current_output_folder_index = (self.current_output_folder_index + 1) % len(output_folders)
         except Exception as e:
-            QMessageBox.warning(self, "警告", f"出现错误：{e}")
+            self.printError(f"出现错误：{e}")
 
-        # QMessageBox.information(self, "提示", "文件移动完成")
+    def printOutput(self, message):
+        self.output_text.setTextColor(Qt.white)
+        self.output_text.append(message)
+
+    def printError(self, message):
+        self.output_text.setTextColor(Qt.red)
+        self.output_text.append(message)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
